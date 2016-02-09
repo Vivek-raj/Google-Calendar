@@ -4,6 +4,7 @@ var express  = require('express');
 var config = require('./config');
 var gcal = require('google-calendar');
 
+var CronJob = require('cron').CronJob;
 
 
 //Config Express and Passport
@@ -76,12 +77,16 @@ app.get('/:calendarId', function(req, res){
   var accessToken     = req.session.access_token;
   var calendarId      = req.params.calendarId;
   
+
+  new CronJob('* * * * * *', function() { //runs every second
   gcal(accessToken).events.list(calendarId, {maxResults:50}, function(err, data) {
     if(err) return res.send(500,err);
     console.log(data.items);
-    return res.send(data);
+    return res.send(data.items);
     
   });
+
+  }, null, true, 'Asia/Kathmandu');
 });
 
 
@@ -93,6 +98,7 @@ app.get('/:calendarId/:eventId', function(req, res){
   var calendarId      = req.params.calendarId;
   var eventId         = req.params.eventId;
   
+
   gcal(accessToken).events.get(calendarId, eventId, function(err, data) {
     if(err) return res.send(500,err);
     return res.send(data);
